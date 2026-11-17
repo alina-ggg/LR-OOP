@@ -1,0 +1,113 @@
+@startuml lr3_cpp_classes
+title ЛР3: диаграмма классов (C++, проект 1)
+skinparam classAttributeIconSize 0
+hide circle
+
+class Array<T> {
+  - data_: T*
+  - size_: size_t
+  - capacity_: size_t
+  - resize(n: size_t): void
+  + Array() / Array(cap) / copy / move / ~Array()
+  + pushBack(v) / popBack(): T
+  + insertAt(i, v) / removeAt(i)
+  + at(i): T&  (+ const-версия)
+  + getSize() / getCapacity() / isEmpty() / clear()
+}
+
+class SinglyLinkedList<T> {
+  - head_: Node*
+  - tail_: Node*
+  - size_: size_t
+  - swap(o): void
+  + pushFront / pushBack / insertAt
+  + removeFront / removeBack / removeAt
+  + at(i): T& (+ const) / contains(v)
+  + findIf(pred) / removeIf(pred)
+  + getSize() / isEmpty() / clear()
+}
+class SllNode as "Node<T> (private)" {
+  + value: T
+  + next: Node*
+}
+SinglyLinkedList *-- SllNode : узлы
+
+class DoublyLinkedList<T> {
+  - head_: Node*
+  - tail_: Node*
+  - size_: size_t
+  - nodeAt(i): Node*
+  + pushFront / pushBack / insertAt
+  + removeFront / removeBack O(1) / removeAt
+  + at(i): T& (+ const) / contains(v)
+  + getSize() / isEmpty() / clear()
+}
+class DllNode as "Node<T> (private)" {
+  + value: T
+  + prev: Node*
+  + next: Node*
+}
+DoublyLinkedList *-- DllNode : узлы
+
+class Stack<T> {
+  - data_: Array<T>
+  + push(v) / pop(): T / top(): T& (+ const)
+  + getSize() / isEmpty() / clear()
+}
+Stack *--> Array : LIFO-адаптер
+
+class Queue<T> {
+  - data_: SinglyLinkedList<T>
+  + enqueue(v) / dequeue(): T / front(): T& (+ const)
+  + getSize() / isEmpty() / clear()
+}
+Queue *--> SinglyLinkedList : FIFO-адаптер
+
+class HashTable<K, V> {
+  - buckets_: Array<SinglyLinkedList<Entry>>
+  - size_: size_t
+  - bucketIndex(k): size_t
+  - rehash(): void
+  + insert(k, v) / contains(k) / at(k): V& (+ const)
+  + remove(k) / forEach(fn)
+  + getSize() / getBucketCount() / loadFactor() / clear()
+}
+class Entry as "Entry<K,V> (private)" {
+  + key: K
+  + value: V
+}
+HashTable *-- Entry
+HashTable *--> Array : бакеты
+
+class HashTraits<K> <<interface>> {
+  + {static} hash(k: K): size_t
+}
+note right of HashTraits
+  специализации:
+  int -> hashInt (Кнут)
+  string -> hashString (FNV-1a)
+end note
+HashTable ..> HashTraits : выбор хеш-функции
+
+class CompleteBinaryTree<T> {
+  - nodes_: Array<T>
+  - parentIndex / leftChildIndex / rightChildIndex
+  + insert(v) / removeLast() / root(): T& (+ const)
+  + at(i) / parentOf / leftChildOf / rightChildOf
+  + hasParent / hasLeftChild / hasRightChild
+  + contains(v) / getHeight() / getSize() / clear()
+}
+CompleteBinaryTree *--> Array : level-order
+
+class Serializer <<utility>> {
+  + {static} writeHeader(os) / readHeader(is)
+  + {static} saveBinary(c, os) / loadBinary(c, is)
+}
+Serializer ..> Array
+Serializer ..> SinglyLinkedList
+Serializer ..> DoublyLinkedList
+Serializer ..> Stack
+Serializer ..> Queue
+Serializer ..> HashTable
+Serializer ..> CompleteBinaryTree
+@enduml

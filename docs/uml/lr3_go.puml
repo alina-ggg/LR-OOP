@@ -1,0 +1,91 @@
+@startuml lr3_go_structs
+title ЛР3: диаграмма структур (Go, проект 2)
+skinparam classAttributeIconSize 0
+hide circle
+
+class Array<T> <<struct>> {
+  - data: []T
+  - size: int
+  - capacity: int
+  + PushBack / PopBack / InsertAt / RemoveAt
+  + At / Set / Clear / Size / Capacity / IsEmpty
+}
+
+class SinglyLinkedList<T> <<struct>> {
+  - head: *sllNode
+  - tail: *sllNode
+  - size: int
+  + PushFront / PushBack / InsertAt
+  + RemoveFront / RemoveBack / RemoveAt
+  + At / Set / Contains / Clear
+}
+class sllNode<T> <<struct>> {
+  - value: T
+  - next: *sllNode
+}
+SinglyLinkedList *-- sllNode
+
+class DoublyLinkedList<T> <<struct>> {
+  - head: *dllNode
+  - tail: *dllNode
+  - size: int
+  - nodeAt(i): *dllNode
+  + PushFront / PushBack / InsertAt
+  + RemoveFront / RemoveBack / RemoveAt
+  + At / Set / Contains / Clear
+}
+class dllNode<T> <<struct>> {
+  - value: T
+  - prev: *dllNode
+  - next: *dllNode
+}
+DoublyLinkedList *-- dllNode
+
+class Stack<T> <<struct>> {
+  - data: Array<T>
+  + Push / Pop / Top / Size / IsEmpty / Clear
+}
+Stack *--> Array : LIFO-адаптер
+
+class Queue<T> <<struct>> {
+  - data: SinglyLinkedList<T>
+  + Enqueue / Dequeue / Front / Size / IsEmpty / Clear
+}
+Queue *--> SinglyLinkedList : FIFO-адаптер
+
+class HashTable<K, V> <<struct>> {
+  - buckets: [][]entry
+  - size: int
+  - hash: func(K) uint64
+  + Insert / Get / Contains / Remove
+  + BucketCount / LoadFactor / BucketSize / Clear
+  + {static} HashInt / HashString
+}
+class entry<K, V> <<struct>> {
+  - key: K
+  - value: V
+}
+HashTable *-- entry
+HashTable ..> "hash func" : инъекция зависимости
+
+class CompleteBinaryTree<T> <<struct>> {
+  - nodes: []T
+  + Insert / RemoveLast / Root / At / Set
+  + ParentOf / LeftChildOf / RightChildOf
+  + HasParent / HasLeftChild / HasRightChild
+  + Contains / Height / Size / Clear
+}
+
+class Serializer <<functions>> {
+  + SaveTextArray / LoadTextArray
+  + SaveTextSingly / LoadTextSingly
+  + SaveTextDoubly / LoadTextDoubly
+  + SaveTextStack / LoadTextStack
+  + SaveTextQueue / LoadTextQueue
+  + SaveTextHashTable / LoadTextHashTable
+  + SaveTextTree / LoadTextTree
+}
+Serializer ..> Array
+Serializer ..> HashTable
+Serializer ..> CompleteBinaryTree
+@enduml
