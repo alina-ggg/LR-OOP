@@ -89,3 +89,25 @@ func (t *CompleteBinaryTree[T]) Height() int {
 }
 
 func (t *CompleteBinaryTree[T]) Clear() { t.nodes = nil }
+func (t *CompleteBinaryTree[T]) IsComplete() bool {
+	n := len(t.nodes)
+	if n == 0 {
+		return true
+	}
+	for i := 0; i < n; i++ {
+		left := 2*i + 1
+		right := 2*i + 2
+		if left < n && right >= n {
+			for j := i + 1; j < n; j++ {
+				if 2*j+1 < n {
+					return false
+				}
+			}
+			return true
+		}
+		if left >= n && right < n {
+			return false
+		}
+	}
+	return true
+}

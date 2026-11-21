@@ -1,0 +1,4 @@
+HASH_STR_INT 3
+"banana"	20
+"cherry"	30
+"apple"	10

@@ -302,8 +302,6 @@ func LoadTextHashTable[K comparable, V any](r io.Reader, t *HashTable[K, V]) err
 	return sc.Err()
 }
 
-// ---- Дерево: level-order ----
-
 func SaveTextTree[T any](w io.Writer, tr *CompleteBinaryTree[T]) error {
 	if err := writeHeader(w, "TREE", tr.Size()); err != nil {
 		return err

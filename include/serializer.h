@@ -1,187 +1,119 @@
 #ifndef SERIALIZER_H
 #define SERIALIZER_H
 
-#include <cstdint>
-#include <istream>
-#include <ostream>
+#include <iostream>
 #include <string>
-
+#include <cstdint>
 #include "array.h"
-#include "complete_binary_tree.h"
-#include "doubly_linked_list.h"
-#include "hash_table.h"
-#include "queue.h"
 #include "singly_linked_list.h"
+#include "doubly_linked_list.h"
 #include "stack.h"
+#include "queue.h"
+#include "hash_table.h"
+#include "complete_binary_tree.h"
 
-// заголовок бинарного файла
-void writeHeader(std::ostream &os);
-void readHeader(std::istream &is);
+class Serializer {
+public:
+    // Magic number и версия для бинарного формата
+    static constexpr std::uint32_t kMagic = 0x4C523353u;  // "LR3S"
+    static constexpr std::uint32_t kVersion = 1;
 
-// скаляры и строки
-inline void saveValue(std::ostream &os, int v) {
-  os.write(reinterpret_cast<const char *>(&v), sizeof(v));
-}
-inline void loadValue(std::istream &is, int &v) {
-  is.read(reinterpret_cast<char *>(&v), sizeof(v));
-}
-inline void saveValue(std::ostream &os, const std::string &s) {
-  std::uint64_t len = s.size();
-  os.write(reinterpret_cast<const char *>(&len), sizeof(len));
-  os.write(s.data(), static_cast<std::streamsize>(len));
-}
-inline void loadValue(std::istream &is, std::string &s) {
-  std::uint64_t len = 0;
-  is.read(reinterpret_cast<char *>(&len), sizeof(len));
-  s.assign(len, '\0');
-  is.read(&s[0], static_cast<std::streamsize>(len));
-}
-inline void saveSize(std::ostream &os, std::size_t n) {
-  std::uint64_t v = n;
-  os.write(reinterpret_cast<const char *>(&v), sizeof(v));
-}
-inline std::size_t loadSize(std::istream &is) {
-  std::uint64_t v = 0;
-  is.read(reinterpret_cast<char *>(&v), sizeof(v));
-  return static_cast<std::size_t>(v);
-}
+    // бинарная
 
-// контейнеры
-template <typename T> void saveBinary(const Array<T> &a, std::ostream &os) {
-  writeHeader(os);
-  saveSize(os, a.getSize());
-  for (std::size_t i = 0; i < a.getSize(); ++i)
-    saveValue(os, a[i]);
-}
-template <typename T> void loadBinary(Array<T> &a, std::istream &is) {
-  readHeader(is);
-  a.clear();
-  std::size_t n = loadSize(is);
-  for (std::size_t i = 0; i < n; ++i) {
-    T v{};
-    loadValue(is, v);
-    a.pushBack(v);
-  }
-}
+    // Массив
+    static void saveArrayInt(const Array<int>& arr, std::ostream& os);
+    static void loadArrayInt(Array<int>& arr, std::istream& is);
+    static void saveArrayString(const Array<std::string>& arr, std::ostream& os);
+    static void loadArrayString(Array<std::string>& arr, std::istream& is);
 
-template <typename T>
-void saveBinary(const SinglyLinkedList<T> &l, std::ostream &os) {
-  writeHeader(os);
-  saveSize(os, l.getSize());
-  for (std::size_t i = 0; i < l.getSize(); ++i)
-    saveValue(os, l.at(i));
-}
-template <typename T>
-void loadBinary(SinglyLinkedList<T> &l, std::istream &is) {
-  readHeader(is);
-  l.clear();
-  std::size_t n = loadSize(is);
-  for (std::size_t i = 0; i < n; ++i) {
-    T v{};
-    loadValue(is, v);
-    l.pushBack(v);
-  }
-}
+    // Односвязный список
+    static void saveSinglyInt(const SinglyLinkedList<int>& list, std::ostream& os);
+    static void loadSinglyInt(SinglyLinkedList<int>& list, std::istream& is);
+    static void saveSinglyString(const SinglyLinkedList<std::string>& list, std::ostream& os);
+    static void loadSinglyString(SinglyLinkedList<std::string>& list, std::istream& is);
 
-template <typename T>
-void saveBinary(const DoublyLinkedList<T> &l, std::ostream &os) {
-  writeHeader(os);
-  saveSize(os, l.getSize());
-  for (std::size_t i = 0; i < l.getSize(); ++i)
-    saveValue(os, l.at(i));
-}
-template <typename T>
-void loadBinary(DoublyLinkedList<T> &l, std::istream &is) {
-  readHeader(is);
-  l.clear();
-  std::size_t n = loadSize(is);
-  for (std::size_t i = 0; i < n; ++i) {
-    T v{};
-    loadValue(is, v);
-    l.pushBack(v);
-  }
-}
+    // Двусвязный список
+    static void saveDoublyInt(const DoublyLinkedList<int>& list, std::ostream& os);
+    static void loadDoublyInt(DoublyLinkedList<int>& list, std::istream& is);
+    static void saveDoublyString(const DoublyLinkedList<std::string>& list, std::ostream& os);
+    static void loadDoublyString(DoublyLinkedList<std::string>& list, std::istream& is);
 
-template <typename T> void saveBinary(const Stack<T> &st, std::ostream &os) {
-  writeHeader(os);
-  saveSize(os, st.getSize());
-  Stack<T> tmp(st);
-  Array<T> reversed;
-  while (!tmp.isEmpty())
-    reversed.pushBack(tmp.pop());
-  for (std::size_t i = reversed.getSize(); i-- > 0;) {
-    saveValue(os, reversed[i]); // ...и пишем снизу вверх
-  }
-}
-template <typename T> void loadBinary(Stack<T> &st, std::istream &is) {
-  readHeader(is);
-  st.clear();
-  std::size_t n = loadSize(is);
-  for (std::size_t i = 0; i < n; ++i) {
-    T v{};
-    loadValue(is, v);
-    st.push(v);
-  }
-}
+    // Стек
+    static void saveStackInt(const Stack<int>& stack, std::ostream& os);
+    static void loadStackInt(Stack<int>& stack, std::istream& is);
+    static void saveStackString(const Stack<std::string>& stack, std::ostream& os);
+    static void loadStackString(Stack<std::string>& stack, std::istream& is);
 
-template <typename T> void saveBinary(const Queue<T> &q, std::ostream &os) {
-  writeHeader(os);
-  saveSize(os, q.getSize());
-  Queue<T> tmp(q);
-  while (!tmp.isEmpty())
-    saveValue(os, tmp.dequeue()); // FIFO-порядок
-}
-template <typename T> void loadBinary(Queue<T> &q, std::istream &is) {
-  readHeader(is);
-  q.clear();
-  std::size_t n = loadSize(is);
-  for (std::size_t i = 0; i < n; ++i) {
-    T v{};
-    loadValue(is, v);
-    q.enqueue(v);
-  }
-}
+    // Очередь
+    static void saveQueueInt(const Queue<int>& queue, std::ostream& os);
+    static void loadQueueInt(Queue<int>& queue, std::istream& is);
+    static void saveQueueString(const Queue<std::string>& queue, std::ostream& os);
+    static void loadQueueString(Queue<std::string>& queue, std::istream& is);
 
-template <typename K, typename V>
-void saveBinary(const HashTable<K, V> &t, std::ostream &os) {
-  writeHeader(os);
-  saveSize(os, t.getSize());
-  t.forEach([&](const K &k, const V &v) {
-    saveValue(os, k);
-    saveValue(os, v);
-  });
-}
-template <typename K, typename V>
-void loadBinary(HashTable<K, V> &t, std::istream &is) {
-  readHeader(is);
-  t.clear();
-  std::size_t n = loadSize(is);
-  for (std::size_t i = 0; i < n; ++i) {
-    K k{};
-    V v{};
-    loadValue(is, k);
-    loadValue(is, v);
-    t.insert(k, v);
-  }
-}
+    // Хеш-таблица
+    static void saveHashIntInt(const HashTable<int, int>& table, std::ostream& os);
+    static void loadHashIntInt(HashTable<int, int>& table, std::istream& is);
+    static void saveHashStringInt(const HashTable<std::string, int>& table, std::ostream& os);
+    static void loadHashStringInt(HashTable<std::string, int>& table, std::istream& is);
 
-template <typename T>
-void saveBinary(const CompleteBinaryTree<T> &t, std::ostream &os) {
-  writeHeader(os);
-  saveSize(os, t.getSize());
-  for (std::size_t i = 0; i < t.getSize(); ++i)
-    saveValue(os, t.at(i));
-}
-template <typename T>
-void loadBinary(CompleteBinaryTree<T> &t, std::istream &is) {
-  readHeader(is);
-  t.clear();
-  std::size_t n = loadSize(is);
-  for (std::size_t i = 0; i < n; ++i) {
-    T v{};
-    loadValue(is, v);
-    t.insert(v);
-  }
-}
+    // Дерево
+    static void saveTreeInt(const CompleteBinaryTree<int>& tree, std::ostream& os);
+    static void loadTreeInt(CompleteBinaryTree<int>& tree, std::istream& is);
+
+    // текстовая
+
+    // Массив
+    static void saveArrayIntText(const Array<int>& arr, std::ostream& os);
+    static void loadArrayIntText(Array<int>& arr, std::istream& is);
+    static void saveArrayStringText(const Array<std::string>& arr, std::ostream& os);
+    static void loadArrayStringText(Array<std::string>& arr, std::istream& is);
+
+    // Односвязный список
+    static void saveSinglyIntText(const SinglyLinkedList<int>& list, std::ostream& os);
+    static void loadSinglyIntText(SinglyLinkedList<int>& list, std::istream& is);
+    static void saveSinglyStringText(const SinglyLinkedList<std::string>& list, std::ostream& os);
+    static void loadSinglyStringText(SinglyLinkedList<std::string>& list, std::istream& is);
+
+    // Двусвязный список
+    static void saveDoublyIntText(const DoublyLinkedList<int>& list, std::ostream& os);
+    static void loadDoublyIntText(DoublyLinkedList<int>& list, std::istream& is);
+    static void saveDoublyStringText(const DoublyLinkedList<std::string>& list, std::ostream& os);
+    static void loadDoublyStringText(DoublyLinkedList<std::string>& list, std::istream& is);
+
+    // Стек
+    static void saveStackIntText(const Stack<int>& stack, std::ostream& os);
+    static void loadStackIntText(Stack<int>& stack, std::istream& is);
+    static void saveStackStringText(const Stack<std::string>& stack, std::ostream& os);
+    static void loadStackStringText(Stack<std::string>& stack, std::istream& is);
+
+    // Очередь
+    static void saveQueueIntText(const Queue<int>& queue, std::ostream& os);
+    static void loadQueueIntText(Queue<int>& queue, std::istream& is);
+    static void saveQueueStringText(const Queue<std::string>& queue, std::ostream& os);
+    static void loadQueueStringText(Queue<std::string>& queue, std::istream& is);
+
+    // Хеш-таблица
+    static void saveHashIntIntText(const HashTable<int, int>& table, std::ostream& os);
+    static void loadHashIntIntText(HashTable<int, int>& table, std::istream& is);
+    static void saveHashStringIntText(const HashTable<std::string, int>& table, std::ostream& os);
+    static void loadHashStringIntText(HashTable<std::string, int>& table, std::istream& is);
+
+    // Дерево
+    static void saveTreeIntText(const CompleteBinaryTree<int>& tree, std::ostream& os);
+    static void loadTreeIntText(CompleteBinaryTree<int>& tree, std::istream& is);
+
+private:
+    // помощники для бинарного формата
+    static void writeHeader(std::ostream& os, const std::string& tag, std::size_t size);
+    static std::size_t readHeader(std::istream& is, const std::string& expectedTag);
+    static void writeString(std::ostream& os, const std::string& str);
+    static std::string readString(std::istream& is);
+
+    // помощники для текстового формата
+    static void writeTextHeader(std::ostream& os, const std::string& tag, std::size_t size);
+    static std::size_t readTextHeader(std::istream& is, const std::string& expectedTag);
+    static std::string quoteString(const std::string& s);
+    static std::string unquoteString(const std::string& s);
+};
 
 #endif

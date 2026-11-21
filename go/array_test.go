@@ -87,3 +87,23 @@ func TestArrayNegativeCapacity(t *testing.T) {
 	assert.Equal(t, 0, a.Capacity())
 	assert.Equal(t, 0, a.Size())
 }
+
+func TestArrayContains(t *testing.T) {
+	a := NewArray[int]()
+	a.PushBack(10)
+	a.PushBack(20)
+	a.PushBack(30)
+
+	// Функция сравнения для int
+	eqInt := func(a, b int) bool { return a == b }
+
+	assert.True(t, a.Contains(10, eqInt))
+	assert.True(t, a.Contains(20, eqInt))
+	assert.True(t, a.Contains(30, eqInt))
+	assert.False(t, a.Contains(0, eqInt))
+	assert.False(t, a.Contains(99, eqInt))
+
+	// Пустой массив
+	empty := NewArray[int]()
+	assert.False(t, empty.Contains(1, eqInt))
+}

@@ -153,3 +153,77 @@ func (l *DoublyLinkedList[T]) Clear() {
 	l.tail = nil
 	l.size = 0
 }
+
+func (l *DoublyLinkedList[T]) InsertBefore(v T, newValue T, eq func(a, b T) bool) bool {
+	for cur := l.head; cur != nil; cur = cur.next {
+		if eq(cur.value, v) {
+			n := &dllNode[T]{value: newValue, prev: cur.prev, next: cur}
+			if cur.prev != nil {
+				cur.prev.next = n
+			} else {
+				l.head = n
+			}
+			cur.prev = n
+			l.size++
+			return true
+		}
+	}
+	return false
+}
+
+func (l *DoublyLinkedList[T]) InsertAfter(v T, newValue T, eq func(a, b T) bool) bool {
+	for cur := l.head; cur != nil; cur = cur.next {
+		if eq(cur.value, v) {
+			n := &dllNode[T]{value: newValue, prev: cur, next: cur.next}
+			if cur.next != nil {
+				cur.next.prev = n
+			} else {
+				l.tail = n
+			}
+			cur.next = n
+			l.size++
+			return true
+		}
+	}
+	return false
+}
+
+func (l *DoublyLinkedList[T]) RemoveBefore(v T, eq func(a, b T) bool) bool {
+	for cur := l.head; cur != nil; cur = cur.next {
+		if eq(cur.value, v) {
+			if cur.prev == nil {
+				return false // перед v нет элементов
+			}
+			toDelete := cur.prev
+			if toDelete.prev != nil {
+				toDelete.prev.next = cur
+			} else {
+				l.head = cur
+			}
+			cur.prev = toDelete.prev
+			l.size--
+			return true
+		}
+	}
+	return false
+}
+
+func (l *DoublyLinkedList[T]) RemoveAfter(v T, eq func(a, b T) bool) bool {
+	for cur := l.head; cur != nil; cur = cur.next {
+		if eq(cur.value, v) {
+			if cur.next == nil {
+				return false // после v нет элементов
+			}
+			toDelete := cur.next
+			if toDelete.next != nil {
+				toDelete.next.prev = cur
+			} else {
+				l.tail = cur
+			}
+			cur.next = toDelete.next
+			l.size--
+			return true
+		}
+	}
+	return false
+}

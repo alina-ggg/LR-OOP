@@ -90,3 +90,12 @@ func (a *Array[T]) Set(index int, v T) error {
 }
 
 func (a *Array[T]) Clear() { a.size = 0 }
+
+func (a *Array[T]) Contains(v T, eq func(a, b T) bool) bool {
+	for i := 0; i < a.size; i++ {
+		if eq(a.data[i], v) {
+			return true
+		}
+	}
+	return false
+}

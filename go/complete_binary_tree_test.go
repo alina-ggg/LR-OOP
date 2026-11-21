@@ -85,3 +85,27 @@ func TestTreeRemoveHeightContains(t *testing.T) {
 	tr.Clear()
 	assert.True(t, tr.IsEmpty())
 }
+
+func TestIsComplete(t *testing.T) {
+	// Полное дерево: 7 узлов = 3 уровня
+	tr := NewCompleteBinaryTree[int]()
+	for i := 1; i <= 7; i++ {
+		tr.Insert(i)
+	}
+	assert.True(t, tr.IsComplete())
+
+	// Неполное дерево: добавим 8-й узёл (должен быть на 4-м уровне слева)
+	tr.Insert(8)
+	assert.True(t, tr.IsComplete()) // всё ещё полное
+
+	// Добавим 10-й (пропустив 9-й) — но Insert добавляет по порядку,
+	// поэтому просто проверим на маленьком дереве
+	tr2 := NewCompleteBinaryTree[int]()
+	tr2.Insert(1)
+	tr2.Insert(2)
+	tr2.Insert(3)
+	assert.True(t, tr2.IsComplete())
+
+	empty := NewCompleteBinaryTree[int]()
+	assert.True(t, empty.IsComplete())
+}

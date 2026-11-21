@@ -7,6 +7,6 @@
 // целочисленный ключ
 std::size_t hashInt(int key);
 // строковый ключ
-std::size_t hashString(const std::string &key);
+std::size_t hashString(const std::string& key);
 
 #endif

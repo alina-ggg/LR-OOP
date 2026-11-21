@@ -139,6 +139,86 @@ func (l *SinglyLinkedList[T]) Contains(v T, eq func(a, b T) bool) bool {
 	return false
 }
 
+func (l *SinglyLinkedList[T]) InsertBefore(v T, newValue T, eq func(a, b T) bool) bool {
+	if l.head == nil {
+		return false
+	}
+	// вставка перед головой
+	if eq(l.head.value, v) {
+		l.PushFront(newValue)
+		return true
+	}
+	cur := l.head
+	for cur.next != nil {
+		if eq(cur.next.value, v) {
+			n := &sllNode[T]{value: newValue, next: cur.next}
+			cur.next = n
+			l.size++
+			return true
+		}
+		cur = cur.next
+	}
+	return false
+}
+
+func (l *SinglyLinkedList[T]) InsertAfter(v T, newValue T, eq func(a, b T) bool) bool {
+	cur := l.head
+	for cur != nil {
+		if eq(cur.value, v) {
+			n := &sllNode[T]{value: newValue, next: cur.next}
+			cur.next = n
+			if cur == l.tail {
+				l.tail = n
+			}
+			l.size++
+			return true
+		}
+		cur = cur.next
+	}
+	return false
+}
+
+func (l *SinglyLinkedList[T]) RemoveBefore(v T, eq func(a, b T) bool) bool {
+	if l.head == nil || l.head.next == nil {
+		return false
+	}
+	// если второй элемент == v, удаляем голову
+	if eq(l.head.next.value, v) {
+		err := l.RemoveFront()
+		return err == nil
+	}
+	cur := l.head
+	for cur.next != nil && cur.next.next != nil {
+		if eq(cur.next.next.value, v) {
+			cur.next = cur.next.next
+			l.size--
+			return true
+		}
+		cur = cur.next
+	}
+	return false
+}
+
+func (l *SinglyLinkedList[T]) RemoveAfter(v T, eq func(a, b T) bool) bool {
+	cur := l.head
+	for cur != nil {
+		if eq(cur.value, v) {
+			if cur.next == nil {
+				return false // после v нет элементов
+			}
+			toDelete := cur.next
+			cur.next = toDelete.next
+			if toDelete == l.tail {
+				l.tail = cur
+			}
+			l.size--
+			return true
+		}
+		cur = cur.next
+	}
+	return false
+}
+
 func (l *SinglyLinkedList[T]) Clear() {
 	l.head = nil
 	l.tail = nil
