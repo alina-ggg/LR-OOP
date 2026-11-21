@@ -15,7 +15,7 @@ func ensureDir(path string) {
 }
 
 func main() {
-	fmt.Println("  sdfdЛабораторная работа: Структуры данных (Go)")
+	fmt.Println("  Лабораторная работа: Структуры данных (Go)")
 	fmt.Println("  Демонстрация операций и сериализации")
 
 	fmt.Println("1. Базовые операции")
